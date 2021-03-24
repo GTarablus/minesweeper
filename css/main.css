@@ -1,0 +1,15 @@
+body {
+  background-color: rgb(144, 144, 144);
+  text-align: center;
+}
+
+.game-board {
+  margin: auto;
+}
+.game-board td {
+  width: 60px;
+  height: 60px;
+  border: solid;
+  text-align: center;
+  font-size: 2em;
+}
