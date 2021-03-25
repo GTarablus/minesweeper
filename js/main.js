@@ -8,6 +8,8 @@ const EMPTY = "";
 const HAPPY = "🥳";
 const openColor = "rgb(180, 180, 180)";
 
+/****************** GLOBAL VARIABLES ******************/
+
 var elFace = document.querySelector(".faceHolder");
 elFace.innerHTML = FACE;
 var gTime = 0;
@@ -21,6 +23,8 @@ var increaseTime;
 var gFlagCount = 0;
 var openCellCount = 0;
 var gBoardSize = 4;
+
+/****************** LEVEL MODIFIER ******************/
 
 function levelModif(level) {
   elFace.innerHTML = FACE;
@@ -49,15 +53,14 @@ function levelModif(level) {
     renderBoard(gBoard);
   }
 }
-
+/****************** INITIALIZING FUNCTION ******************/
 function init() {
   gBoard = createBoard(gBoardSize);
   renderBoard(gBoard);
   document.querySelector("#Easy").checked = true;
   document.querySelector("body").style.opacity = 1;
-  // console.table(gBoard);
 }
-
+/****************** CREATE GAME BOARD ******************/
 //Building the game board according to size
 function createBoard(size) {
   var board = [];
@@ -72,10 +75,9 @@ function createBoard(size) {
       };
     }
   }
-  //   console.table(board);
   return board;
 }
-
+/****************** PLACING MINES ******************/
 //Placing mines on the board, using random inclusive function according to random number
 function placeMines(board, mines) {
   for (var i = 0; i < mines; i++) {
@@ -84,17 +86,15 @@ function placeMines(board, mines) {
       j: getRandomIntInclusive(0, board.length - 1),
     };
     var currValue = board[position.g][position.j].value;
-    // console.log(currValue);
     if (board[position.g][position.j].isHit || currValue === MINE) {
       i--;
     } else {
       board[position.g][position.j].value = MINE;
       gMineLocations[i] = position;
-      // console.log(gMineLocations);
     }
   }
 }
-
+/****************** CHECKING ALL NEIGHBOURS ******************/
 function checkAllNeighbours(board) {
   for (var i = 0; i < board.length; i++) {
     for (var j = 0; j < board.length; j++) {
@@ -104,7 +104,7 @@ function checkAllNeighbours(board) {
     }
   }
 }
-
+/****************** CHECK CELL NEIGHBOURS ******************/
 function checkCellNeighbours(cell, board) {
   var neighCount = 0;
   for (var i = cell.i - 1; i <= cell.i + 1 && i < gBoard.length; i++) {
@@ -118,7 +118,7 @@ function checkCellNeighbours(cell, board) {
   }
   return neighCount;
 }
-
+/****************** RENDERING BOARD ******************/
 //Rendering board
 function renderBoard(board) {
   var strHtml = "";
@@ -137,7 +137,7 @@ function renderBoard(board) {
   var elMat = document.querySelector(".game-board");
   elMat.innerHTML = strHtml;
 }
-
+/****************** CELLCLICKED FUNCTION ******************/
 /* cellClicked function
 Returns if clicked cell is flagged, updates isHit to true
 show content only if game is on, places mines (except for clicked pos)
@@ -149,13 +149,10 @@ function cellClicked(cell) {
     g: +cell.dataset.i,
     j: +cell.dataset.j,
   };
-  // if (gBoard[cellPos.g][cellPos.j].isHit === true) return;
   var cellValue = cell.children[0].innerText;
   if (cellValue === FLAG) return;
   gBoard[cellPos.g][cellPos.j].isHit = true;
-  console.log(gBoard);
   if (isGameOn) cell.children[0].style.opacity = 1;
-  //   console.log(gBoard[i][j]);
   if (!isGameOn && elFace.innerHTML === FACE) {
     isGameOn = true;
     gameClock();
@@ -164,7 +161,6 @@ function cellClicked(cell) {
     renderBoard(gBoard);
     cell.children[0].style.opacity = 1;
     cell.style.backgroundColor = openColor;
-    // cellClicked(cell);
     return;
   }
   if (cellValue === MINE && isGameOn) {
@@ -174,21 +170,17 @@ function cellClicked(cell) {
     cell.style.backgroundColor = openColor;
     openNeighbours(cellPos, gBoard);
     openCellCount++;
-    console.log(openCellCount);
     checkVictory();
   } else {
     cell.style.backgroundColor = openColor;
     openCellCount++;
-    console.log(openCellCount);
     checkVictory();
   }
 }
-
+/****************** FLAGGING CELLS ******************/
 function cellFlagged(cell) {
   gFlagCount++;
-  console.log(gFlagCount);
   var cellValue = cell.children[0].innerText;
-  console.log(cellValue);
   var i = +cell.dataset.i;
   var j = +cell.dataset.j;
   if (!isGameOn) {
@@ -211,7 +203,7 @@ function cellFlagged(cell) {
   }
   checkVictory();
 }
-
+/****************** OPENING NEIGHBOUR CELLS ******************/
 function openNeighbours(cell, board) {
   for (var i = cell.g - 1; i <= cell.g + 1 && i < gBoard.length; i++) {
     for (var j = cell.j - 1; j <= cell.j + 1; j++) {
@@ -227,7 +219,7 @@ function openNeighbours(cell, board) {
     }
   }
 }
-
+/****************** LOSE GAME ******************/
 /* loseGame function
 Reveals all mine locations using a mine array
 stops the clock, changes player face, turns off game
@@ -244,7 +236,7 @@ function loseGame() {
     document.querySelector("h1").innerHTML = "🤯 You Died! 💀";
   }
 }
-
+/****************** CHECK VICTORY ******************/
 function checkVictory() {
   var notMineCount = 0;
   for (var i = 0; i < gBoard.length; i++) {
@@ -257,7 +249,7 @@ function checkVictory() {
   if (gFlagCount === numOfMines && openCellCount === notMineCount) {
     winGame();
   }
-}
+} /****************** WIN GAME FUNCTION ******************/
 
 function winGame() {
   elFace.innerHTML = HAPPY;
@@ -268,7 +260,7 @@ function winGame() {
   document.querySelector("h1").innerHTML =
     "🎉🎊 You Win! 🎊🎉 <br> Your Time: " + gTime + " Seconds";
 }
-
+/****************** EMOJI FACE BUTTON FUNCTION ******************/
 function faceBtn() {
   isGameOn = false;
   clearInterval(increaseTime);
@@ -285,4 +277,5 @@ function faceBtn() {
 List of bugs:
 1. First cell doesn't show content when clicked.
 2. First cell doesn't show content when flagged.
+Find way to turn bugs into feature.
 */
