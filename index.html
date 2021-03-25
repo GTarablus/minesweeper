@@ -8,10 +8,41 @@
     <link rel="stylesheet" href="css/main.css" />
     <h3 class="clock">0</h3>
   </head>
-  <body onload="init()">
+  <body onload="init()" oncontextmenu="return false;">
+    <div class="faceHolder" onclick="faceBtn()"></div>
+    <div>
+      <input
+        type="radio"
+        class="radio"
+        id="Easy"
+        name="level"
+        value="Easy"
+        onclick="levelModif(value)"
+      />
+      <label class="radioText" for="Easy">Easy</label>
+      <input
+        type="radio"
+        class="radio"
+        id="Medium"
+        name="level"
+        value="Medium"
+        onclick="levelModif(value)"
+      />
+      <label class="radioText" for="Medium">Medium</label>
+      <input
+        type="radio"
+        class="radio"
+        id="Hard"
+        name="level"
+        value="Hard"
+        onclick="levelModif(value)"
+      />
+      <label class="radioText" for="Hard">Hard</label>
+    </div>
     <table class="center">
       <tbody class="game-board"></tbody>
     </table>
+    <h1>Click a cell twice to initialize game 😉</h1>
     <script src="js/utils.js"></script>
     <script src="js/main.js"></script>
   </body>

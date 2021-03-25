@@ -33,3 +33,21 @@ function getRandomColor() {
   var color = Math.floor(Math.random() * 16777216).toString(16);
   return "#000000".slice(0, -color.length) + color;
 }
+
+//Game clock runs on an interval every second, adding to seconds count
+function gameClock() {
+  gTime = 0;
+  increaseTime = setInterval(function () {
+    gTime++;
+    elClock.innerHTML = gTime;
+  }, 1000);
+  increaseTime;
+}
+
+function renderCell(location, value) {
+  // Select the elCell and set the value
+  var elCell = document.querySelector(`.cell${location.g}-${location.j}`);
+  elCell.innerHTML = value;
+  if (value != MINE) elCell.style.backgroundColor = "rgb(180, 180, 180)";
+  openCellCount++;
+}
