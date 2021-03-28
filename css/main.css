@@ -62,6 +62,7 @@ td p {
 
 .clock {
   font-size: 2em;
+  font-family: monospace;
 }
 
 .shields {
@@ -70,4 +71,14 @@ td p {
 
 .shields:hover {
   cursor: pointer;
+}
+
+h5 {
+  font-size: 1.3em;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+h2 {
+  margin-top: auto;
 }

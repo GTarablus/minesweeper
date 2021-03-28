@@ -7,6 +7,7 @@
     <title>Minesweeper</title>
     <link rel="icon" href="img/minesweeper-icon.png" />
     <link rel="stylesheet" href="css/main.css" />
+    <h1>🅼🅸🅽🅴🆂🆆🅴🅴🅿🅴🆁</h1>
     <h3 class="clock">0</h3>
   </head>
   <body onload="init()" oncontextmenu="return false;">
@@ -43,14 +44,15 @@
     <table class="center">
       <tbody class="game-board"></tbody>
     </table>
+    <h5 class="bestScore"></h5>
     <div class="indications">
       <p class="hints" onClick="hintClick()" title="Hints"></p>
       <p class="lives"></p>
       <p class="shields" onClick="safeClick()" title="Safe Click"></p>
     </div>
-    <h1>Click a cell twice to initialize game 😉</h1>
+    <h2>Click a cell twice to initialize game 😉</h2>
+    <script src="js/confetti.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/main.js"></script>
-    <script type="text/javascript" src="js/vanilla-tilt.js"></script>
   </body>
 </html>

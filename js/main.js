@@ -2,22 +2,24 @@
 
 const MINE = "💣";
 const FLAG = "🚩";
-const FACE = "😐";
+const FACE = "😀";
 const DEAD = "🤯";
 const EMPTY = "";
 const HAPPY = "🥳";
 const openColor = "rgb(180, 180, 180)";
 const HEART = "💖";
-const BROKEN = "💔";
 const SHIELD = "🛡️";
 const INITIALTEXT = "Click a cell to initialize the game 🎮";
 const BOOMSOUND = new Audio("sounds/boom.mp3");
+const PARTYSOUND = new Audio("sounds/party.mp3");
+const LOSESOUND = new Audio("sounds/lose.mp3");
 const BGC = "rgb(100, 185, 200)";
-const HINT = "";
 
 /****************** GLOBAL VARIABLES ******************/
 
 var elFace = document.querySelector(".faceHolder");
+var elBestScore = document.querySelector(".bestScore");
+var elText = document.querySelector("h2");
 elFace.innerHTML = FACE;
 var gTime = 0;
 var elClock = document.querySelector(".clock");
@@ -41,7 +43,7 @@ var gCurrLevel = "Easy";
 function levelModif(level) {
   gCurrLevel = level;
   elFace.innerHTML = FACE;
-  document.querySelector("h1").innerHTML = INITIALTEXT;
+  elText.innerHTML = INITIALTEXT;
 
   elClock.innerHTML = 0;
   if (isGameOn) {
@@ -57,6 +59,10 @@ function levelModif(level) {
     gLives = 2;
     gShields = 2;
     elBody.style.backgroundColor = BGC;
+    confetti.stop();
+    if (localStorage.Easy) {
+      elBestScore.innerText = `Best time for this level is: ${localStorage.Easy} seconds`;
+    } else elBestScore.style.display = "none";
   }
   if (level === "Medium") {
     numOfMines = 12;
@@ -68,6 +74,10 @@ function levelModif(level) {
     gLives = 3;
     gShields = 3;
     elBody.style.backgroundColor = BGC;
+    confetti.stop();
+    if (localStorage.Medium) {
+      elBestScore.innerText = `Best time for this level is: ${localStorage.Medium} seconds`;
+    } else elBestScore.style.display = "none";
   }
   if (level === "Hard") {
     numOfMines = 30;
@@ -79,6 +89,10 @@ function levelModif(level) {
     gLives = 3;
     gShields = 3;
     elBody.style.backgroundColor = BGC;
+    confetti.stop();
+    if (localStorage.Hard) {
+      elBestScore.innerText = `Best time for this level is: ${localStorage.Hard} seconds`;
+    } else elBestScore.style.display = "none";
   }
 }
 /****************** INITIALIZING FUNCTION ******************/
@@ -86,8 +100,9 @@ function init() {
   gBoard = createBoard(gBoardSize);
   renderBoard(gBoard);
   document.querySelector("body").style.opacity = 1;
-  if (!isGameOn) document.querySelector("#Easy").checked = true;
+  if (!isGameOn) document.querySelector(`#${gCurrLevel}`).checked = true;
   levelModif(gCurrLevel);
+  confetti.stop();
 }
 /****************** CREATE GAME BOARD ******************/
 //Building the game board according to size
@@ -178,7 +193,6 @@ function cellClicked(cell) {
     g: +cell.dataset.i,
     j: +cell.dataset.j,
   };
-  console.log(cellPos.g, cellPos.j);
   var cellValue = cell.children[0].innerText;
   if (cellValue === FLAG || gBoard[cellPos.g][cellPos.j].isHit === true) return;
   gBoard[cellPos.g][cellPos.j].isHit = true;
@@ -190,13 +204,12 @@ function cellClicked(cell) {
     checkAllNeighbours(gBoard);
     renderBoard(gBoard);
     var newCell = document.querySelector(`#cell${cellPos.g}-${cellPos.j}`);
-    console.log(newCell);
     newCell.children[0].style.opacity = 1; // Attempt to set opacity of first clicked cell in order  to show its value after first click and after board is rendered
     newCell.style.backgroundColor = openColor; //Attempt to set first click background
     if (gBoard[cellPos.g][cellPos.j].value === EMPTY)
       openRecur(cellPos, gBoard);
     openCellCount++;
-    document.querySelector("h1").innerHTML = "May the Force be with you 🐸";
+    elText.innerHTML = "May the Force be with you 🐸";
     return;
   }
   if (cellValue === MINE && isGameOn && gLives === 1) {
@@ -213,7 +226,7 @@ function cellClicked(cell) {
     if (gLives === 1) {
       elLives.innerText = HEART;
       elBody.style.backgroundColor = "rgb(179, 21, 21)";
-      document.querySelector("h1").innerHTML = "DANGER";
+      elText.innerHTML = "DANGER";
     }
   } else if (cellValue === EMPTY && isGameOn) {
     cell.style.backgroundColor = openColor;
@@ -252,8 +265,24 @@ function cellFlagged(cell) {
   }
   checkVictory();
 }
-/****************** OPENING NEIGHBOUR CELLS ******************/
-function openNeighbours(cell, board) {
+/****************** FULL REVEAL ******************/
+//Based on openNeighbours function:
+// function openNeighbours(cell, board) {
+//   for (var i = cell.g - 1; i <= cell.g + 1 && i < gBoard.length; i++) {
+//     for (var j = cell.j - 1; j <= cell.j + 1; j++) {
+//       if (i < 0 || j < 0 || i === board.length || j === board.length) continue;
+//       if (board[i][j].isHit) continue;
+//       var value = board[i][j].value;
+//       var nextCell = {
+//         g: i,
+//         j,
+//       };
+//       board[i][j].isHit = true;
+//       renderCell(nextCell, value);
+//     }
+//   }
+// }
+function openRecur(cell, board) {
   for (var i = cell.g - 1; i <= cell.g + 1 && i < gBoard.length; i++) {
     for (var j = cell.j - 1; j <= cell.j + 1; j++) {
       if (i < 0 || j < 0 || i === board.length || j === board.length) continue;
@@ -265,6 +294,8 @@ function openNeighbours(cell, board) {
       };
       board[i][j].isHit = true;
       renderCell(nextCell, value);
+      if (value !== EMPTY) continue;
+      openRecur(nextCell, board);
     }
   }
 }
@@ -275,6 +306,9 @@ stops the clock, changes player face, turns off game
 */
 function loseGame() {
   for (var i = 0; i < gMineLocations.length; i++) {
+    setTimeout(function () {
+      LOSESOUND.play();
+    }, 500);
     var currLocation = gMineLocations[i];
     renderCell(currLocation, MINE);
     clearInterval(increaseTime);
@@ -282,7 +316,7 @@ function loseGame() {
     isGameOn = false;
     openCellCount = 0;
     gFlagCount = 0;
-    document.querySelector("h1").innerHTML = "🤯 You Died! 💀";
+    elText.innerHTML = "🤯 You Died! 💀<br> NO CONFETTI FOR YOU";
   }
 }
 /****************** CHECK VICTORY ******************/
@@ -295,31 +329,34 @@ function checkVictory() {
       }
     }
   }
-  if (gFlagCount === numOfMines && openCellCount === notMineCount) {
+  if (gFlagCount >= numOfMines && openCellCount === notMineCount) {
     winGame();
   }
 } /****************** WIN GAME FUNCTION ******************/
 
 function winGame() {
+  confetti.start();
+  PARTYSOUND.play();
   elFace.innerHTML = HAPPY;
   clearInterval(increaseTime);
   isGameOn = false;
   openCellCount = 0;
   gFlagCount = 0;
-  document.querySelector("h1").innerHTML =
-    "🎉🎊 You Win! 🎊🎉 <br> Your Time: " + gTime + " Seconds";
+  winText(gCurrLevel);
 }
 /****************** EMOJI FACE BUTTON FUNCTION ******************/
 function faceBtn() {
   isGameOn = false;
+  document.querySelector(`#${gCurrLevel}`).checked = true;
   elClock.innerHTML = 0;
   clearInterval(increaseTime);
   init();
   elFace.innerHTML = FACE;
   openCellCount = 0;
   gFlagCount = 0;
-  document.querySelector("h1").innerHTML = INITIALTEXT;
+  elText.innerHTML = INITIALTEXT;
   elBody.style.backgroundColor = BGC;
+  confetti.stop();
 }
 
 /****************** EMOJI FACE BUTTON FUNCTION ******************/
@@ -349,21 +386,42 @@ function safeClick() {
   if (gShields === 0) elShields.innerHTML = " " + " " + " ";
 }
 
-/****************** RECURSION TEST ******************/
-function openRecur(cell, board) {
-  for (var i = cell.g - 1; i <= cell.g + 1 && i < gBoard.length; i++) {
-    for (var j = cell.j - 1; j <= cell.j + 1; j++) {
-      if (i < 0 || j < 0 || i === board.length || j === board.length) continue;
-      if (board[i][j].isHit) continue;
-      var value = board[i][j].value;
-      var nextCell = {
-        g: i,
-        j,
-      };
-      board[i][j].isHit = true;
-      renderCell(nextCell, value);
-      if (value !== EMPTY) continue;
-      openRecur(nextCell, board);
+function winText(level) {
+  if (level === "Easy") {
+    if (localStorage.Easy) {
+      if (gTime < localStorage.Easy) localStorage.Easy = gTime;
+    } else {
+      localStorage.setItem(gCurrLevel, gTime);
     }
+    elText.innerHTML =
+      "🎉🎊 You Win! 🎊🎉 <br> Your Time: " +
+      gTime +
+      " Seconds <br> Best time: " +
+      localStorage.Easy +
+      " seconds";
+  } else if (level === "Medium") {
+    if (localStorage.Medium) {
+      if (gTime < localStorage.Medium) localStorage.Medium = gTime;
+    } else {
+      localStorage.setItem(gCurrLevel, gTime);
+    }
+    elText.innerHTML =
+      "🎉🎊 You Win! 🎊🎉 <br> Your Time: " +
+      gTime +
+      " Seconds <br> Best time: " +
+      localStorage.Medium +
+      " seconds";
+  } else if (level === "Hard") {
+    if (localStorage.Hard) {
+      if (gTime < localStorage.Hard) localStorage.Hard = gTime;
+    } else {
+      localStorage.setItem(gCurrLevel, gTime);
+    }
+    elText.innerHTML =
+      "🎉🎊 You Win! 🎊🎉 <br> Your Time: " +
+      gTime +
+      " Seconds <br> Best time: " +
+      localStorage.Hard +
+      " seconds";
   }
 }
