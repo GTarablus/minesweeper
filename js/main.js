@@ -222,6 +222,7 @@ function cellClicked(cell) {
     BOOMSOUND.play();
     gLives--;
     gFlagCount++;
+    checkVictory();
     if (gLives === 2) elLives.innerText = HEART + HEART;
     if (gLives === 1) {
       elLives.innerText = HEART;
