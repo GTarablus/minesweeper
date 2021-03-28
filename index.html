@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minesweeper</title>
+    <link rel="icon" href="img/minesweeper-icon.png" />
     <link rel="stylesheet" href="css/main.css" />
     <h3 class="clock">0</h3>
   </head>
@@ -43,11 +44,13 @@
       <tbody class="game-board"></tbody>
     </table>
     <div class="indications">
+      <p class="hints" onClick="hintClick()" title="Hints"></p>
       <p class="lives"></p>
-      <p class="hints"></p>
+      <p class="shields" onClick="safeClick()" title="Safe Click"></p>
     </div>
     <h1>Click a cell twice to initialize game 😉</h1>
     <script src="js/utils.js"></script>
     <script src="js/main.js"></script>
+    <script type="text/javascript" src="js/vanilla-tilt.js"></script>
   </body>
 </html>

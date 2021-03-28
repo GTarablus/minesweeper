@@ -9,7 +9,11 @@ const HAPPY = "🥳";
 const openColor = "rgb(180, 180, 180)";
 const HEART = "💖";
 const BROKEN = "💔";
+const SHIELD = "🛡️";
 const INITIALTEXT = "Click a cell to initialize the game 🎮";
+const BOOMSOUND = new Audio("sounds/boom.mp3");
+const BGC = "rgb(100, 185, 200)";
+const HINT = "";
 
 /****************** GLOBAL VARIABLES ******************/
 
@@ -28,7 +32,9 @@ var gFlagCount = 0;
 var openCellCount = 0;
 var gBoardSize = 4;
 var elLives = document.querySelector(".indications .lives");
+var elShields = document.querySelector(".shields");
 var gLives = 2;
+var gShields = 2;
 var gCurrLevel = "Easy";
 /****************** LEVEL MODIFIER ******************/
 
@@ -36,6 +42,7 @@ function levelModif(level) {
   gCurrLevel = level;
   elFace.innerHTML = FACE;
   document.querySelector("h1").innerHTML = INITIALTEXT;
+
   elClock.innerHTML = 0;
   if (isGameOn) {
     faceBtn();
@@ -46,8 +53,10 @@ function levelModif(level) {
     gBoard = createBoard(gBoardSize);
     renderBoard(gBoard);
     elLives.innerText = HEART + HEART;
+    elShields.innerText = SHIELD + SHIELD;
     gLives = 2;
-    elBody.style.backgroundColor = "rgb(100, 185, 200)";
+    gShields = 2;
+    elBody.style.backgroundColor = BGC;
   }
   if (level === "Medium") {
     numOfMines = 12;
@@ -55,8 +64,10 @@ function levelModif(level) {
     gBoard = createBoard(gBoardSize);
     renderBoard(gBoard);
     elLives.innerText = HEART + HEART + HEART;
+    elShields.innerText = SHIELD + SHIELD + SHIELD;
     gLives = 3;
-    elBody.style.backgroundColor = "rgb(100, 185, 200)";
+    gShields = 3;
+    elBody.style.backgroundColor = BGC;
   }
   if (level === "Hard") {
     numOfMines = 30;
@@ -64,16 +75,18 @@ function levelModif(level) {
     gBoard = createBoard(gBoardSize);
     renderBoard(gBoard);
     elLives.innerText = HEART + HEART + HEART;
+    elShields.innerText = SHIELD + SHIELD + SHIELD;
     gLives = 3;
-    elBody.style.backgroundColor = "rgb(100, 185, 200)";
+    gShields = 3;
+    elBody.style.backgroundColor = BGC;
   }
 }
 /****************** INITIALIZING FUNCTION ******************/
 function init() {
   gBoard = createBoard(gBoardSize);
   renderBoard(gBoard);
-  document.querySelector("#Easy").checked = true;
   document.querySelector("body").style.opacity = 1;
+  if (!isGameOn) document.querySelector("#Easy").checked = true;
   levelModif(gCurrLevel);
 }
 /****************** CREATE GAME BOARD ******************/
@@ -165,6 +178,7 @@ function cellClicked(cell) {
     g: +cell.dataset.i,
     j: +cell.dataset.j,
   };
+  console.log(cellPos.g, cellPos.j);
   var cellValue = cell.children[0].innerText;
   if (cellValue === FLAG || gBoard[cellPos.g][cellPos.j].isHit === true) return;
   gBoard[cellPos.g][cellPos.j].isHit = true;
@@ -179,16 +193,20 @@ function cellClicked(cell) {
     console.log(newCell);
     newCell.children[0].style.opacity = 1; // Attempt to set opacity of first clicked cell in order  to show its value after first click and after board is rendered
     newCell.style.backgroundColor = openColor; //Attempt to set first click background
+    if (gBoard[cellPos.g][cellPos.j].value === EMPTY)
+      openRecur(cellPos, gBoard);
     openCellCount++;
     document.querySelector("h1").innerHTML = "May the Force be with you 🐸";
     return;
   }
   if (cellValue === MINE && isGameOn && gLives === 1) {
     cell.style.backgroundColor = "red";
+    BOOMSOUND.play();
     elLives.innerText = "";
     loseGame();
   } else if (cellValue === MINE && isGameOn && gLives > 1) {
     cell.style.backgroundColor = "red";
+    BOOMSOUND.play();
     gLives--;
     gFlagCount++;
     if (gLives === 2) elLives.innerText = HEART + HEART;
@@ -199,7 +217,7 @@ function cellClicked(cell) {
     }
   } else if (cellValue === EMPTY && isGameOn) {
     cell.style.backgroundColor = openColor;
-    openNeighbours(cellPos, gBoard);
+    openRecur(cellPos, gBoard);
     openCellCount++;
     checkVictory();
   } else {
@@ -294,12 +312,58 @@ function winGame() {
 /****************** EMOJI FACE BUTTON FUNCTION ******************/
 function faceBtn() {
   isGameOn = false;
-  clearInterval(increaseTime);
   elClock.innerHTML = 0;
+  clearInterval(increaseTime);
   init();
   elFace.innerHTML = FACE;
   openCellCount = 0;
   gFlagCount = 0;
   document.querySelector("h1").innerHTML = INITIALTEXT;
-  elBody.style.backgroundColor = "rgb(100, 185, 200)";
+  elBody.style.backgroundColor = BGC;
+}
+
+/****************** EMOJI FACE BUTTON FUNCTION ******************/
+function safeClick() {
+  if (!isGameOn || gShields === 0) return;
+  var safeCells = [];
+  for (var i = 0; i < gBoard.length; i++) {
+    for (var j = 0; j < gBoard.length; j++) {
+      if (!gBoard[i][j].isHit && gBoard[i][j].value !== MINE) {
+        var position = {
+          i,
+          j,
+        };
+        safeCells.push(position);
+      }
+    }
+  }
+  var safePos = safeCells[getRandomIntInclusive(0, safeCells.length - 1)];
+  var safeCell = document.querySelector(`#cell${safePos.i}-${safePos.j}`);
+  safeCell.style.backgroundColor = "green";
+  setTimeout(function () {
+    safeCell.style.backgroundColor = "rgb(144, 144, 144)";
+  }, 500);
+  gShields--;
+  if (gShields === 2) elShields.innerHTML = SHIELD + SHIELD + " ";
+  if (gShields === 1) elShields.innerHTML = SHIELD + " " + " ";
+  if (gShields === 0) elShields.innerHTML = " " + " " + " ";
+}
+
+/****************** RECURSION TEST ******************/
+function openRecur(cell, board) {
+  for (var i = cell.g - 1; i <= cell.g + 1 && i < gBoard.length; i++) {
+    for (var j = cell.j - 1; j <= cell.j + 1; j++) {
+      if (i < 0 || j < 0 || i === board.length || j === board.length) continue;
+      if (board[i][j].isHit) continue;
+      var value = board[i][j].value;
+      var nextCell = {
+        g: i,
+        j,
+      };
+      board[i][j].isHit = true;
+      renderCell(nextCell, value);
+      if (value !== EMPTY) continue;
+      openRecur(nextCell, board);
+    }
+  }
 }

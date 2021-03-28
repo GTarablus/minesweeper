@@ -8,6 +8,7 @@ body {
 
 .game-board {
   margin: auto;
+  transition: 0.3s;
 }
 
 .center {
@@ -22,6 +23,7 @@ body {
   text-align: center;
   font-size: 2em;
   cursor: default;
+  transition: 0.3s;
 }
 
 .game-board td:hover {
@@ -51,6 +53,7 @@ td p {
 .indications {
   font-size: 2em;
   margin-block-start: 0%;
+  display: inline-flex;
 }
 
 .radioText {
@@ -59,4 +62,12 @@ td p {
 
 .clock {
   font-size: 2em;
+}
+
+.shields {
+  margin-left: 100px;
+}
+
+.shields:hover {
+  cursor: pointer;
 }

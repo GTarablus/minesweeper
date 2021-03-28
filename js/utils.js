@@ -51,3 +51,17 @@ function renderCell(location, value) {
   if (value != MINE) elCell.style.backgroundColor = "rgb(180, 180, 180)";
   openCellCount++;
 }
+
+// Initializes 'Vanillatilt' for cell animation
+function initTiltBoard() {
+  var tiltSpans = document.querySelectorAll(".tilt");
+  console.log(tiltSpans);
+  // var innerTiltSpans = document.querySelectorAll(".num-cell");
+
+  VanillaTilt.init(tiltSpans, {
+    // max: gLevel.DIFF === 3 ? 15 : 20,
+    // speed: 500,
+    // glare: gLevel.DIFF < 3 ? true : false,
+    // reverse: gLevel.DIFF === 3 ? true : false,
+  });
+}
