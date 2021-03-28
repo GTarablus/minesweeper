@@ -7,6 +7,9 @@ const DEAD = "🤯";
 const EMPTY = "";
 const HAPPY = "🥳";
 const openColor = "rgb(180, 180, 180)";
+const HEART = "💖";
+const BROKEN = "💔";
+const INITIALTEXT = "Click a cell to initialize the game 🎮";
 
 /****************** GLOBAL VARIABLES ******************/
 
@@ -14,6 +17,7 @@ var elFace = document.querySelector(".faceHolder");
 elFace.innerHTML = FACE;
 var gTime = 0;
 var elClock = document.querySelector(".clock");
+var elBody = document.querySelector("body");
 var gBoard;
 var numOfMines = 2;
 var isGameOn = false;
@@ -23,13 +27,15 @@ var increaseTime;
 var gFlagCount = 0;
 var openCellCount = 0;
 var gBoardSize = 4;
-
+var elLives = document.querySelector(".indications .lives");
+var gLives = 2;
+var gCurrLevel = "Easy";
 /****************** LEVEL MODIFIER ******************/
 
 function levelModif(level) {
+  gCurrLevel = level;
   elFace.innerHTML = FACE;
-  document.querySelector("h1").innerHTML =
-    "Click a cell twice to initialize game 😉";
+  document.querySelector("h1").innerHTML = INITIALTEXT;
   elClock.innerHTML = 0;
   if (isGameOn) {
     faceBtn();
@@ -39,18 +45,27 @@ function levelModif(level) {
     gBoardSize = 4;
     gBoard = createBoard(gBoardSize);
     renderBoard(gBoard);
+    elLives.innerText = HEART + HEART;
+    gLives = 2;
+    elBody.style.backgroundColor = "rgb(100, 185, 200)";
   }
   if (level === "Medium") {
     numOfMines = 12;
     gBoardSize = 8;
     gBoard = createBoard(gBoardSize);
     renderBoard(gBoard);
+    elLives.innerText = HEART + HEART + HEART;
+    gLives = 3;
+    elBody.style.backgroundColor = "rgb(100, 185, 200)";
   }
   if (level === "Hard") {
     numOfMines = 30;
     gBoardSize = 12;
     gBoard = createBoard(gBoardSize);
     renderBoard(gBoard);
+    elLives.innerText = HEART + HEART + HEART;
+    gLives = 3;
+    elBody.style.backgroundColor = "rgb(100, 185, 200)";
   }
 }
 /****************** INITIALIZING FUNCTION ******************/
@@ -59,6 +74,7 @@ function init() {
   renderBoard(gBoard);
   document.querySelector("#Easy").checked = true;
   document.querySelector("body").style.opacity = 1;
+  levelModif(gCurrLevel);
 }
 /****************** CREATE GAME BOARD ******************/
 //Building the game board according to size
@@ -128,7 +144,7 @@ function renderBoard(board) {
     for (var j = 0; j < row.length; j++) {
       var cell = board[i][j].value;
 
-      strHtml += `<td data-i="${i}" data-j="${j}" class="cell${i}-${j}" onclick="cellClicked(this)" oncontextmenu="cellFlagged(this)">
+      strHtml += `<td data-i="${i}" data-j="${j}" id="cell${i}-${j}" onclick="cellClicked(this)" oncontextmenu="cellFlagged(this)">
                                <p> ${cell} </p>
                             </td>`;
     }
@@ -150,7 +166,7 @@ function cellClicked(cell) {
     j: +cell.dataset.j,
   };
   var cellValue = cell.children[0].innerText;
-  if (cellValue === FLAG) return;
+  if (cellValue === FLAG || gBoard[cellPos.g][cellPos.j].isHit === true) return;
   gBoard[cellPos.g][cellPos.j].isHit = true;
   if (isGameOn) cell.children[0].style.opacity = 1;
   if (!isGameOn && elFace.innerHTML === FACE) {
@@ -159,13 +175,28 @@ function cellClicked(cell) {
     placeMines(gBoard, numOfMines);
     checkAllNeighbours(gBoard);
     renderBoard(gBoard);
-    cell.children[0].style.opacity = 1;
-    cell.style.backgroundColor = openColor;
+    var newCell = document.querySelector(`#cell${cellPos.g}-${cellPos.j}`);
+    console.log(newCell);
+    newCell.children[0].style.opacity = 1; // Attempt to set opacity of first clicked cell in order  to show its value after first click and after board is rendered
+    newCell.style.backgroundColor = openColor; //Attempt to set first click background
+    openCellCount++;
+    document.querySelector("h1").innerHTML = "May the Force be with you 🐸";
     return;
   }
-  if (cellValue === MINE && isGameOn) {
+  if (cellValue === MINE && isGameOn && gLives === 1) {
     cell.style.backgroundColor = "red";
+    elLives.innerText = "";
     loseGame();
+  } else if (cellValue === MINE && isGameOn && gLives > 1) {
+    cell.style.backgroundColor = "red";
+    gLives--;
+    gFlagCount++;
+    if (gLives === 2) elLives.innerText = HEART + HEART;
+    if (gLives === 1) {
+      elLives.innerText = HEART;
+      elBody.style.backgroundColor = "rgb(179, 21, 21)";
+      document.querySelector("h1").innerHTML = "DANGER";
+    }
   } else if (cellValue === EMPTY && isGameOn) {
     cell.style.backgroundColor = openColor;
     openNeighbours(cellPos, gBoard);
@@ -269,13 +300,6 @@ function faceBtn() {
   elFace.innerHTML = FACE;
   openCellCount = 0;
   gFlagCount = 0;
-  document.querySelector("h1").innerHTML =
-    "Click a cell twice to initialize game 😉";
+  document.querySelector("h1").innerHTML = INITIALTEXT;
+  elBody.style.backgroundColor = "rgb(100, 185, 200)";
 }
-
-/*
-List of bugs:
-1. First cell doesn't show content when clicked.
-2. First cell doesn't show content when flagged.
-Find way to turn bugs into feature.
-*/

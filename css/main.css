@@ -1,5 +1,5 @@
 body {
-  background-color: rgb(144, 144, 144);
+  background-color: rgb(100, 185, 200);
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
   opacity: 0;
@@ -15,11 +15,22 @@ body {
   margin-right: auto;
 }
 .game-board td {
+  background-color: rgb(144, 144, 144);
   width: 60px;
   height: 60px;
   border: solid;
   text-align: center;
   font-size: 2em;
+  cursor: default;
+}
+
+.game-board td:hover {
+  color: #5999ff;
+  border: rgb(0, 0, 0) solid 2px;
+  background: rgb(90, 90, 90);
+  transition: 0.2s;
+  box-shadow: black 10px;
+  cursor: pointer;
 }
 
 .faceHolder {
@@ -35,6 +46,11 @@ body {
 td p {
   margin: 0;
   opacity: 0;
+}
+
+.indications {
+  font-size: 2em;
+  margin-block-start: 0%;
 }
 
 .radioText {

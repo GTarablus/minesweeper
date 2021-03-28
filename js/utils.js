@@ -46,7 +46,7 @@ function gameClock() {
 
 function renderCell(location, value) {
   // Select the elCell and set the value
-  var elCell = document.querySelector(`.cell${location.g}-${location.j}`);
+  var elCell = document.querySelector(`#cell${location.g}-${location.j}`);
   elCell.innerHTML = value;
   if (value != MINE) elCell.style.backgroundColor = "rgb(180, 180, 180)";
   openCellCount++;
