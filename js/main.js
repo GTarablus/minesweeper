@@ -222,13 +222,13 @@ function cellClicked(cell) {
     BOOMSOUND.play();
     gLives--;
     gFlagCount++;
-    checkVictory();
     if (gLives === 2) elLives.innerText = HEART + HEART;
     if (gLives === 1) {
       elLives.innerText = HEART;
       elBody.style.backgroundColor = "rgb(179, 21, 21)";
       elText.innerHTML = "DANGER";
     }
+    checkVictory();
   } else if (cellValue === EMPTY && isGameOn) {
     cell.style.backgroundColor = openColor;
     openRecur(cellPos, gBoard);
